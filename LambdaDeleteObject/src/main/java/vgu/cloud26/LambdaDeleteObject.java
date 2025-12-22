@@ -24,6 +24,12 @@ public class LambdaDeleteObject implements
                         
         // Parse request body to get the object key
         String requestBody = event.getBody();
+        if (requestBody == "EventBridgeInvoke") {
+            context.getLogger().log("Invoked by EventBridge, no action taken.");
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withBody("No action taken for EventBridge invocation.");
+        }
         JSONObject bodyJSON = new JSONObject(requestBody);
         String objName = bodyJSON.getString("key");
         

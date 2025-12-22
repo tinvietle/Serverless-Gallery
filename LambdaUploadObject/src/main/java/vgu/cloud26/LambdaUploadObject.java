@@ -21,12 +21,13 @@ public class LambdaUploadObject implements
     public APIGatewayProxyResponseEvent
             handleRequest(APIGatewayProxyRequestEvent event, Context context) {
        
-        String bucketName = "cloud-public-mpg";
+        // String bucketName = "cloud-public-mpg";
         String requestBody = event.getBody();
         
         JSONObject bodyJSON = new JSONObject(requestBody);
         String content = bodyJSON.getString("content");
         String objName = bodyJSON.getString("key");
+        String bucketName = bodyJSON.getString("bucket");
         
         
         byte[] objBytes = Base64.getDecoder().decode(content.getBytes());

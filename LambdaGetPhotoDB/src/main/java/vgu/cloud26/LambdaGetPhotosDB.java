@@ -58,6 +58,15 @@ public class LambdaGetPhotosDB implements RequestHandler<APIGatewayProxyRequestE
 
                 JSONArray items = new JSONArray();
 
+                String content = request.getBody();
+
+                if (content == "EventBridgeInvoke"){
+                        logger.log("Invoked by EventBridge, no action taken.");
+                        return new APIGatewayProxyResponseEvent()
+                                        .withStatusCode(200)
+                                        .withBody("No action taken for EventBridge invocation.");
+                }
+
                 try {
 
                         Class.forName("com.mysql.cj.jdbc.Driver");

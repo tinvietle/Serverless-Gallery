@@ -20,6 +20,14 @@ public class LambdaGetListOfObjects implements RequestHandler<APIGatewayProxyReq
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
         context.getLogger().log("Received request: " + request.getBody());
 
+        String content = request.getBody();
+        if (content == "EventBridgeInvoke") {
+            context.getLogger().log("Invoked by EventBridge, no action taken.");
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withBody("No action taken for EventBridge invocation.");
+        }
+
         String bucketName = "cloud-public-mpg";
 
         S3Client s3Client = S3Client.builder()

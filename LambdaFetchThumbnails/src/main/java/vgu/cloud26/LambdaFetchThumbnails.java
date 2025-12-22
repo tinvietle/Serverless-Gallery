@@ -26,6 +26,14 @@ public class LambdaFetchThumbnails implements RequestHandler<APIGatewayProxyRequ
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 
         String requestBody = request.getBody();
+
+        if (requestBody == "EventBridgeInvoke") {
+            context.getLogger().log("Invoked by EventBridge, no action taken.");
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withBody("No action taken for EventBridge invocation.");
+        }
+
         JSONObject bodyJSON = new JSONObject(requestBody);
         String key = bodyJSON.getString("key");
         //Map<String, String> params = request.getQueryStringParameters();
