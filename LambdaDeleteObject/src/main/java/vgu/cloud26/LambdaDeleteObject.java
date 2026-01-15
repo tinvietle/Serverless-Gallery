@@ -20,11 +20,11 @@ public class LambdaDeleteObject implements
     public APIGatewayProxyResponseEvent
             handleRequest(APIGatewayProxyRequestEvent event, Context context) {
        
-        String bucketName = "cloud-public-mpg";
+        // String bucketName = "cloud-public-mpg";
                         
         // Parse request body to get the object key
         String requestBody = event.getBody();
-        if (requestBody == "EventBridgeInvoke") {
+        if (requestBody != null && requestBody.equals("EventBridgeInvoke")) {
             context.getLogger().log("Invoked by EventBridge, no action taken.");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
@@ -32,6 +32,7 @@ public class LambdaDeleteObject implements
         }
         JSONObject bodyJSON = new JSONObject(requestBody);
         String objName = bodyJSON.getString("key");
+        String bucketName = bodyJSON.getString("bucket");
         
         // Delete object from S3
         DeleteObjectRequest deleteObjectRequest = 

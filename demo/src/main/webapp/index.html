@@ -15,13 +15,31 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
         td {
             border: 1px solid;
         }
+        .gallery-section {
+            display: none;
+        }
+        .gallery-section.show {
+            display: block;
+        }
     </style>
 
 </head>
 
 <body>
     <div>
-        <label for="file_input">file: </label>
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email"> 
+        <button id="email_button" onclick="getTokenForUser()">Login</button>
+    </div>
+
+    <div>
+        <label for="token">Token:</label>
+        <input type="text" id="token" name="token" size="100">
+    </div>
+    
+
+    <div>
+        <label for="File_input">file: </label>
         <input type="file" id="file_input">
         <!-- <button id="upload_button" onclick="uploadObject(); insertDescription();">Upload</button> -->
         <button id="upload_button" onclick="triggerUploadFileAndDescription()">Upload</button>
@@ -30,19 +48,21 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
     <label for="Description">Description:</label>
     <input type="text" id="Description" name="Description" placeholder="Put some text here...">
 
-    <div>
-        <h1>Bucket List</h1>
+    <br><br>
+    <button id="ListButton" onclick="fetchListOfObjects()">List</button>
+    <div class="gallery-section">
+        <h1>Photo Gallery</h1>
     </div>
-    <div>
+    <div class="gallery-section">
         <table id="objectsTable">
         </table>
     </div>
-    <div>
-        <img src="" id="download_image">
-    </div>
+    <!-- <div class="gallery-section">
+        <img src="" id="download_image" alt="Downloaded image">
+    </div> -->
     <script>
         //getObjectList();
-        fetchListOfObjects();
+        //fetchListOfObjects();
 
         function putObject(json) {
             let url = "https://lb5kjez2qhps5pvrcxqoawqvtu0pwczn.lambda-url.us-east-1.on.aws/";
@@ -80,7 +100,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
         }
 
         function deleteObject(filename) {
-            let url = "https://nain725jeyp5oi4pmvnxgjnww40wbqym.lambda-url.us-east-1.on.aws/";
+            let url = "https://amemfkr74omup6c6ycoxtf42ge0wyofo.lambda-url.us-east-1.on.aws/";
             const body = {
                 "key": filename
             };
@@ -151,15 +171,27 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
         }
 
         function fetchListOfObjects() {
-            let url = "https://6extbvc3mnhaqc3dpbsfoq3awa0vfypd.lambda-url.us-east-1.on.aws/";
-            fetch(url)
+            const body = {
+                "email": document.getElementById('email').value,
+                "token": document.getElementById('token').value
+            }
+            let url = "https://4ppxzno45ostxgonxljjkeehmm0siotc.lambda-url.us-east-1.on.aws/";
+            fetch(url,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                }
+            )
                 .then((response) => {
                     if (!response.ok) {
+                        alert("Error fetching object list. Status: " + response.status);
                         throw new Error(`HTTP error, status = ${response.status}`);
                     }
                     return response.text();
                 })
                 .then((text) => {
+                    // Show gallery sections
+                    document.querySelectorAll('.gallery-section').forEach(el => el.classList.add('show'));
                     renderListOfObjects(text);
                 })
                 .catch((error) => {
@@ -302,11 +334,14 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
                 } else {
-                    console.log(xhr.status + " : " + xhr.responseText);
+                    console.log("Error: " + xhr.status);
+                    alert("Error downloading file. Status: " + xhr.status);
                 }
             };
-            xhr.open("POST", "https://btkzlxuocjzugcpba753juzici0puqdo.lambda-url.us-east-1.on.aws/");
+            xhr.open("POST", "https://hl4vd5fzqtxirbwgmqwunklijm0ksibx.lambda-url.us-east-1.on.aws/");
             const body1 = JSON.stringify({
+                "email": document.getElementById('email').value,
+                "token": document.getElementById('token').value,
                 "key": key
             });
             xhr.responseType = 'blob';
@@ -387,6 +422,25 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 .then((resp) => resp.text())
                 .then(function (response) {
                     console.info('fetch()', response);
+                });
+        };
+
+        function getTokenForUser() {
+            let url = "https://5qwvu7cezahvjskn6cxs3aziti0qyydg.lambda-url.us-east-1.on.aws/";
+            const email = document.getElementById('email').value;
+            const body = {
+                "email": email
+            };
+            fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(body)
+            })
+                .then((resp) => resp.json())
+                .then(function (response) {
+                    console.info('fetch()', response);
+                    document.getElementById('token').value = response.token;
+                    // Alert user about the token
+                    alert("Here is your token. Please copy and save it securely.\n\n" + response.token);
                 });
         };
 

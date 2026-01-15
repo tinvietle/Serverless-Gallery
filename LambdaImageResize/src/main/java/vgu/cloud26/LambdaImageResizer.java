@@ -12,8 +12,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.S3Client;
+// import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+// import software.amazon.awssdk.services.s3.S3Client;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import org.json.JSONObject;
@@ -86,21 +86,21 @@ public class LambdaImageResizer implements
         }
     }
 
-    private String getFileExtension(String key) throws Exception {
-        int lastDot = key.lastIndexOf('.');
-        if (lastDot == -1 || lastDot == key.length() - 1) {
-            return "jpg";
-        }
-        return key.substring(lastDot + 1).toLowerCase();
-    }
+//     private String getFileExtension(String key) throws Exception {
+//         int lastDot = key.lastIndexOf('.');
+//         if (lastDot == -1 || lastDot == key.length() - 1) {
+//             return "jpg";
+//         }
+//         return key.substring(lastDot + 1).toLowerCase();
+//     }
 
-    private InputStream getObject(S3Client s3Client, String bucket, String key) {
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build();
-        return s3Client.getObject(getObjectRequest);
-    }
+//     private InputStream getObject(S3Client s3Client, String bucket, String key) {
+//         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+//                 .bucket(bucket)
+//                 .key(key)
+//                 .build();
+//         return s3Client.getObject(getObjectRequest);
+//     }
 
     /**
      * Resizes (shrinks) an image into a small, thumbnail-sized image.

@@ -28,12 +28,20 @@ public class LambdaDeleteResized implements RequestHandler<S3Event, String> {
 
         @Override
         public String handleRequest(S3Event s3event, Context context) {
+                
+
                 LambdaLogger logger = context.getLogger();
                 S3EventNotificationRecord record = s3event.getRecords().get(0);
                 String srcBucket = "cloud-public-mpg";
 
                 // Object key may have spaces or unicode non-ASCII characters.
                 String srcKey = record.getS3().getObject().getUrlDecodedKey();
+
+                // Check if this is a fake EventBridge trigger
+                if ("EventBridgeInvoke".equals(srcKey)) {
+                        logger.log("Invoked by EventBridge, no action taken.");
+                        return "No action taken for EventBridge invocation.";
+                }
 
                 // String dstBucket = "lab-source-images-resized";
                 String dstBucket = "resized-" + srcBucket;

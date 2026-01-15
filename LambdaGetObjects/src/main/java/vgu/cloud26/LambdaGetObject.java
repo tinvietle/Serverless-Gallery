@@ -7,13 +7,9 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
 import java.io.IOException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.util.Base64;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -30,6 +26,12 @@ public class LambdaGetObject implements RequestHandler<APIGatewayProxyRequestEve
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
 
         String requestBody = request.getBody();
+        if (requestBody == "EventBridgeInvoke") {
+            context.getLogger().log("Invoked by EventBridge, no action taken.");
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withBody("No action taken for EventBridge invocation.");
+        }
         JSONObject bodyJSON = new JSONObject(requestBody);
         String key = bodyJSON.getString("key");
         //Map<String, String> params = request.getQueryStringParameters();

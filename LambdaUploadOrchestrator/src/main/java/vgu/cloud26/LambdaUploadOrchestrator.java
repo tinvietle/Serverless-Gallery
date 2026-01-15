@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.json.JSONObject;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkBytes;            
@@ -56,12 +58,19 @@ public class LambdaUploadOrchestrator implements
         }
     }
 
+    // Helper to call another Lambda asynchronously
+    public CompletableFuture<String> callLambdaAsync(String functionName, String payload, LambdaLogger logger) {
+        return CompletableFuture.supplyAsync(() -> {
+            return callLambda(functionName, payload, logger);
+        });
+    }
+
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
         LambdaLogger logger = context.getLogger();
 
         String requestBody = event.getBody();
-        if (requestBody == "EventBridgeInvoke") {
+        if (requestBody != null && requestBody.equals("EventBridgeInvoke")) {
             logger.log("Invoked by EventBridge, no action taken.");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
@@ -79,6 +88,63 @@ public class LambdaUploadOrchestrator implements
 
         String responseString = "";
 
+        // PARALLEL PROCESSING: Process independent operations concurrently
+        try {
+            // Step 1 & 2: Upload original and resize image can run in parallel (independent operations)
+            JSONObject filePayload = new JSONObject()
+                    .put("content", content)
+                    .put("key", uniqueFilename)
+                    .put("bucket", "cloud-public-mpg");
+            JSONObject fileWrapper = new JSONObject()
+                    .put("body", filePayload.toString());
+            
+            JSONObject resizePayload = new JSONObject()
+                    .put("content", content);
+            JSONObject resizeWrapper = new JSONObject()
+                    .put("body", resizePayload.toString());
+            
+            // Launch both operations in parallel
+            CompletableFuture<String> uploadOriginalFuture = callLambdaAsync("LambdaUploadObject", fileWrapper.toString(), logger);
+            CompletableFuture<String> resizeFuture = callLambdaAsync("LambdaImageResizer", resizeWrapper.toString(), logger);
+
+            // Wait for both to complete
+            String uploadOriginalResponse = uploadOriginalFuture.get();
+            String resizeResponse = resizeFuture.get();
+            
+            responseString += uploadOriginalResponse;
+
+            // Step 3 & 4: Upload resized image and upload description DB can run in parallel
+            // (both depend on steps 1 & 2 completing, but are independent of each other)
+            String resizedKey = "resized-" + uniqueFilename;
+            JSONObject resizeImagePayload = new JSONObject()
+                    .put("content", resizeResponse)
+                    .put("key", resizedKey)
+                    .put("bucket", "resized-cloud-public-mpg");
+            JSONObject resizeImageWrapper = new JSONObject()
+                    .put("body", resizeImagePayload.toString());
+            
+            JSONObject descPayload = new JSONObject()
+                    .put("imageKey", uniqueFilename)
+                    .put("description", objDescription);
+            JSONObject descWrapper = new JSONObject()
+                    .put("body", descPayload.toString());
+            
+            // Launch both operations in parallel
+            CompletableFuture<String> uploadResizedFuture = callLambdaAsync("LambdaUploadObject", resizeImageWrapper.toString(), logger);
+            CompletableFuture<String> uploadDescFuture = callLambdaAsync("LambdaUploadDescriptionDB", descWrapper.toString(), logger);
+
+            // Wait for both to complete
+            String uploadResizedResponse = uploadResizedFuture.get();
+            String uploadDescResponse = uploadDescFuture.get();
+            
+            responseString += uploadResizedResponse + uploadDescResponse;
+
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log("Error during parallel execution: " + e.getMessage());
+            responseString = "Error: " + e.getMessage();
+        }
+
+        /* SEQUENTIAL PROCESSING (OLD CODE - COMMENTED FOR COMPARISON):
         // 1. Invoke LambdaUploadObject (upload image)
         JSONObject filePayload = new JSONObject()
                 .put("content", content)
@@ -121,6 +187,7 @@ public class LambdaUploadOrchestrator implements
                 .put("body", descPayload.toString());
 
         responseString += callLambda("LambdaUploadDescriptionDB", descWrapper.toString(), logger);
+        */
 
         // Base64 encode final combined response
         String encodedString = Base64.getEncoder().encodeToString(responseString.getBytes());

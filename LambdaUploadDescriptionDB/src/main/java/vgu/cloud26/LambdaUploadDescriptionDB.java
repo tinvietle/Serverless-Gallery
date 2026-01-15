@@ -16,13 +16,11 @@ import java.sql.DriverManager;
 
 import java.sql.PreparedStatement;
 
-import java.sql.ResultSet;
 
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Properties;
 
-import org.json.JSONArray;
 
 import org.json.JSONObject;
 
@@ -57,7 +55,17 @@ public class LambdaUploadDescriptionDB
                 LambdaLogger logger = context.getLogger();
 
                 try {
-                        JSONObject json = new JSONObject(request.getBody());
+                        String requestBody = request.getBody();
+                        
+                        // Check if invoked by EventBridge (body is just a string, not JSON)
+                        if (requestBody != null && requestBody.equals("EventBridgeInvoke")) {
+                                logger.log("Invoked by EventBridge, no action taken.");
+                                return new APIGatewayProxyResponseEvent()
+                                                .withStatusCode(200)
+                                                .withBody("No action taken for EventBridge invocation.");
+                        }
+                        
+                        JSONObject json = new JSONObject(requestBody);
                         String description = json.getString("description");
                         String imageKey = json.getString("imageKey");
 

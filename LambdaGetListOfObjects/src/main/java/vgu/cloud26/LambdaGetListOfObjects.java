@@ -21,7 +21,7 @@ public class LambdaGetListOfObjects implements RequestHandler<APIGatewayProxyReq
         context.getLogger().log("Received request: " + request.getBody());
 
         String content = request.getBody();
-        if (content == "EventBridgeInvoke") {
+        if (content != null && content.equals("EventBridgeInvoke")) {
             context.getLogger().log("Invoked by EventBridge, no action taken.");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
