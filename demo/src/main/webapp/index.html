@@ -171,6 +171,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                     const decodedText = atob(text);
                     // Show gallery sections
                     document.querySelectorAll('.gallery-section').forEach(el => el.classList.add('show'));
+                    // Remove previous download image
+                    document.getElementById("download_image").src = "";
                     renderListOfObjects(decodedText);
                 })
                 .catch((error) => {
