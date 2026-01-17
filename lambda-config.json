@@ -1,0 +1,108 @@
+{
+  "region": "us-east-1",
+  "runtime": "java21",
+  "timeout": 30,
+  "memorySize": 512,
+  "lambdas": {
+    "LambdaDeleteDescriptionDB": {
+      "functionName": "LambdaDeleteDescriptionDB",
+      "handler": "vgu.cloud26.LambdaDeleteDescriptionDB::handleRequest",
+      "description": "Delete description from database"
+    },
+    "LambdaDeleteObject": {
+      "functionName": "LambdaDeleteObject",
+      "handler": "vgu.cloud26.LambdaDeleteObject::handleRequest",
+      "description": "Delete object from S3"
+    },
+    "LambdaDeleteOrchestrator": {
+      "functionName": "LambdaDeleteOrchestrator",
+      "handler": "vgu.cloud26.LambdaDeleteOrchestrator::handleRequest",
+      "description": "Orchestrate delete operations"
+    },
+    "LambdaDeleteResized": {
+      "functionName": "LambdaDeleteResized",
+      "handler": "vgu.cloud26.LambdaDeleteResized::handleRequest",
+      "description": "Delete resized images"
+    },
+    "LambdaDownloadObject": {
+      "functionName": "LambdaDownloadObject",
+      "handler": "vgu.cloud26.LambdaDownloadObject::handleRequest",
+      "description": "Download object from S3"
+    },
+    "LambdaDownloadOrchestrator": {
+      "functionName": "LambdaDownloadOrchestrator",
+      "handler": "vgu.cloud26.LambdaDownloadOrchestrator::handleRequest",
+      "description": "Orchestrate download operations"
+    },
+    "LambdaEntryPoint": {
+      "functionName": "LambdaEntryPoint",
+      "handler": "vgu.cloud26.LambdaEntryPoint::handleRequest",
+      "description": "Entry point Lambda"
+    },
+    "LambdaFetchThumbnails": {
+      "functionName": "LambdaFetchThumbnails",
+      "handler": "vgu.cloud26.LambdaFetchThumbnails::handleRequest",
+      "description": "Fetch thumbnails"
+    },
+    "LambdaGetListOfObjects": {
+      "functionName": "LambdaGetListOfObjects",
+      "handler": "vgu.cloud26.LambdaGetListOfObjects::handleRequest",
+      "description": "Get list of objects from S3"
+    },
+    "LambdaGetListsOfObjectDB": {
+      "functionName": "LambdaGetListsOfObjectDB",
+      "handler": "vgu.cloud26.LambdaGetListsOfObjectDB::handleRequest",
+      "description": "Get list of objects from database"
+    },
+    "LambdaGetObjects": {
+      "functionName": "LambdaGetObjects",
+      "handler": "vgu.cloud26.LambdaGetObjects::handleRequest",
+      "description": "Get objects"
+    },
+    "LambdaGetPhotoDB": {
+      "functionName": "LambdaGetPhotosDB",
+      "handler": "vgu.cloud26.LambdaGetPhotosDB::handleRequest",
+      "description": "Get photos from database"
+    },
+    "LambdaImageResize": {
+      "functionName": "LambdaImageResize",
+      "handler": "vgu.cloud26.LambdaImageResize::handleRequest",
+      "description": "Resize images"
+    },
+    "LambdaListObjectsOrchestrator": {
+      "functionName": "LambdaListObjectsOrchestrator",
+      "handler": "vgu.cloud26.LambdaListObjectsOrchestrator::handleRequest",
+      "description": "Orchestrate list objects operations"
+    },
+    "LambdaResize": {
+      "functionName": "LambdaResize",
+      "handler": "vgu.cloud26.LambdaResize::handleRequest",
+      "description": "Resize Lambda"
+    },
+    "LambdaTokenChecker": {
+      "functionName": "LambdaTokenChecker",
+      "handler": "vgu.cloud26.LambdaTokenChecker::handleRequest",
+      "description": "Check authentication token"
+    },
+    "LambdaTokenGenerator": {
+      "functionName": "LambdaTokenGenerator",
+      "handler": "vgu.cloud26.LambdaTokenGenerator::handleRequest",
+      "description": "Generate authentication token"
+    },
+    "LambdaUploadDescriptionDB": {
+      "functionName": "LambdaUploadDescriptionDB",
+      "handler": "vgu.cloud26.LambdaUploadDescriptionDB::handleRequest",
+      "description": "Upload description to database"
+    },
+    "LambdaUploadObject": {
+      "functionName": "LambdaUploadObject",
+      "handler": "vgu.cloud26.LambdaUploadObject::handleRequest",
+      "description": "Upload object to S3"
+    },
+    "LambdaUploadOrchestrator": {
+      "functionName": "LambdaUploadOrchestrator",
+      "handler": "vgu.cloud26.LambdaUploadOrchestrator::handleRequest",
+      "description": "Orchestrate upload operations"
+    }
+  }
+}

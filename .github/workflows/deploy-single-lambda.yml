@@ -1,0 +1,167 @@
+# Manual deployment of a single Lambda function
+# Use this when you need to deploy a specific Lambda outside of the normal CI/CD flow
+
+name: Deploy Single Lambda
+
+on:
+  workflow_dispatch:
+    inputs:
+      lambda_project:
+        description: 'Lambda project folder name'
+        required: true
+        type: choice
+        options:
+          - LambdaDeleteDescriptionDB
+          - LambdaDeleteObject
+          - LambdaDeleteOrchestrator
+          - LambdaDeleteResized
+          - LambdaDownloadObject
+          - LambdaDownloadOrchestrator
+          - LambdaEntryPoint
+          - LambdaFetchThumbnails
+          - LambdaGetListOfObjects
+          - LambdaGetListsOfObjectDB
+          - LambdaGetObjects
+          - LambdaGetPhotoDB
+          - LambdaImageResize
+          - LambdaListObjectsOrchestrator
+          - LambdaResize
+          - LambdaTokenChecker
+          - LambdaTokenGenerator
+          - LambdaUploadDescriptionDB
+          - LambdaUploadObject
+          - LambdaUploadOrchestrator
+      skip_tests:
+        description: 'Skip tests during build'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event.inputs.lambda_project }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: maven
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get Lambda configuration
+        id: config
+        run: |
+          LAMBDA_PROJECT="${{ github.event.inputs.lambda_project }}"
+          
+          FUNCTION_NAME=$(jq -r ".lambdas[\"$LAMBDA_PROJECT\"].functionName" lambda-config.json)
+          HANDLER=$(jq -r ".lambdas[\"$LAMBDA_PROJECT\"].handler" lambda-config.json)
+          DESCRIPTION=$(jq -r ".lambdas[\"$LAMBDA_PROJECT\"].description // \"\"" lambda-config.json)
+          TIMEOUT=$(jq -r ".timeout // 30" lambda-config.json)
+          MEMORY=$(jq -r ".memorySize // 512" lambda-config.json)
+          
+          echo "function_name=$FUNCTION_NAME" >> $GITHUB_OUTPUT
+          echo "handler=$HANDLER" >> $GITHUB_OUTPUT
+          echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
+          echo "timeout=$TIMEOUT" >> $GITHUB_OUTPUT
+          echo "memory=$MEMORY" >> $GITHUB_OUTPUT
+          
+          echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Project | $LAMBDA_PROJECT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Function Name | $FUNCTION_NAME |" >> $GITHUB_STEP_SUMMARY
+          echo "| Handler | $HANDLER |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timeout | ${TIMEOUT}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| Memory | ${MEMORY}MB |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Validate configuration
+        run: |
+          if [ "${{ steps.config.outputs.function_name }}" == "null" ] || [ -z "${{ steps.config.outputs.function_name }}" ]; then
+            echo "Error: Lambda configuration not found for ${{ github.event.inputs.lambda_project }}"
+            exit 1
+          fi
+
+      - name: Build with Maven
+        run: |
+          cd ${{ github.event.inputs.lambda_project }}
+          if [ "${{ github.event.inputs.skip_tests }}" == "true" ]; then
+            mvn clean package -DskipTests
+          else
+            mvn clean package
+          fi
+
+      - name: Find JAR file
+        id: jar
+        run: |
+          JAR_PATH=$(find ${{ github.event.inputs.lambda_project }}/target -name "*.jar" ! -name "*original*" -type f | head -1)
+          if [ -z "$JAR_PATH" ]; then
+            echo "Error: No JAR file found"
+            exit 1
+          fi
+          JAR_SIZE=$(du -h "$JAR_PATH" | cut -f1)
+          echo "jar_path=$JAR_PATH" >> $GITHUB_OUTPUT
+          echo "jar_size=$JAR_SIZE" >> $GITHUB_OUTPUT
+          echo "Found JAR: $JAR_PATH (Size: $JAR_SIZE)"
+
+      - name: Check if function exists
+        id: check
+        run: |
+          if aws lambda get-function --function-name ${{ steps.config.outputs.function_name }} --region ${{ env.AWS_REGION }} &> /dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::Function ${{ steps.config.outputs.function_name }} does not exist. Skipping deployment."
+          fi
+
+      - name: Deploy to AWS Lambda
+        if: steps.check.outputs.exists == 'true'
+        run: |
+          echo "Updating function code..."
+          aws lambda update-function-code \
+            --function-name ${{ steps.config.outputs.function_name }} \
+            --zip-file fileb://${{ steps.jar.outputs.jar_path }} \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "Waiting for update to complete..."
+          aws lambda wait function-updated \
+            --function-name ${{ steps.config.outputs.function_name }} \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "Updating function configuration..."
+          aws lambda update-function-configuration \
+            --function-name ${{ steps.config.outputs.function_name }} \
+            --handler "${{ steps.config.outputs.handler }}" \
+            --timeout ${{ steps.config.outputs.timeout }} \
+            --memory-size ${{ steps.config.outputs.memory }} \
+            --region ${{ env.AWS_REGION }} || true
+          
+          aws lambda wait function-updated \
+            --function-name ${{ steps.config.outputs.function_name }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Deployment Summary
+        if: steps.check.outputs.exists == 'true'
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Function **${{ steps.config.outputs.function_name }}** has been updated." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- JAR Size: ${{ steps.jar.outputs.jar_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Region: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Timestamp: $(date -u)" >> $GITHUB_STEP_SUMMARY

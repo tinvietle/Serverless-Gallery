@@ -60,7 +60,7 @@ public class LambdaGetPhotosDB implements RequestHandler<APIGatewayProxyRequestE
 
                 String content = request.getBody();
 
-                if (content == "EventBridgeInvoke"){
+                if (content != null && content.contains("EventBridge")) {
                         logger.log("Invoked by EventBridge, no action taken.");
                         return new APIGatewayProxyResponseEvent()
                                         .withStatusCode(200)
@@ -100,6 +100,8 @@ public class LambdaGetPhotosDB implements RequestHandler<APIGatewayProxyRequestE
                                 item.put("Description", rs.getString("Description"));
 
                                 item.put("S3Key", rs.getString("S3Key"));
+
+                                item.put("Email", rs.getString("Email"));
 
                                 items.put(item);
 

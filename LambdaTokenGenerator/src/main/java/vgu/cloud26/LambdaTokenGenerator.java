@@ -72,6 +72,14 @@ public class LambdaTokenGenerator implements RequestHandler<APIGatewayProxyReque
             JSONObject json = new JSONObject(requestBody);
             
             String email = json.getString("email");
+
+            // Check if email is provided
+            if (email == null || email.isEmpty()) {
+                logger.log("Email is missing in the request");
+                return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400)
+                    .withBody("{\"success\": false, \"error\": \"Email is required\"}");
+            }
             
             // Get the session token from environment variable
             String sessionToken = System.getenv("AWS_SESSION_TOKEN");

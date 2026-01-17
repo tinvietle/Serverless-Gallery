@@ -68,14 +68,16 @@ public class LambdaUploadDescriptionDB
                         JSONObject json = new JSONObject(requestBody);
                         String description = json.getString("description");
                         String imageKey = json.getString("imageKey");
+                        String email = json.getString("email");
 
                         Class.forName("com.mysql.cj.jdbc.Driver");
 
                         try (Connection conn = DriverManager.getConnection(JDBC_URL, setMySqlConnectionProperties());
                                         PreparedStatement stmt = conn.prepareStatement(
-                                                        "INSERT INTO Photos (Description, S3Key) VALUES (?, ?)")) {
+                                                        "INSERT INTO Photos (Description, S3Key, Email) VALUES (?, ?, ?)")) {
                                 stmt.setString(1, description);
                                 stmt.setString(2, imageKey);
+                                stmt.setString(3, email);
                                 stmt.executeUpdate();
                         }
 

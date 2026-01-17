@@ -98,7 +98,7 @@ public class LambdaListObjectsOrchestrator implements
 
         // 3. Invoke LambdaGetListOfObjects
         String payload = "";
-        responseString = callLambda("BlsLambdaGetListOfObjects", payload, logger);
+        responseString = callLambda("LambdaGetPhotosDB", payload, logger);
 
         // 4. Return the downloaded object (base64 encoded)
         // Base64 encode final combined response

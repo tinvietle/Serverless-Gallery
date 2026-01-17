@@ -57,9 +57,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
         <table id="objectsTable">
         </table>
     </div>
-    <!-- <div class="gallery-section">
+    <div class="gallery-section">
         <img src="" id="download_image" alt="Downloaded image">
-    </div> -->
+    </div>
     <script>
         //getObjectList();
         //fetchListOfObjects();
@@ -115,9 +115,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 });
         }
 
-        async function renderListOfObjects(listOfObjects) {
-            const descriptionList = await fetchDescriptionList();
-
+        function renderListOfObjects(listOfObjects) {
             let objectsTable = document.getElementById("objectsTable");
             while (objectsTable.firstChild) {
                 objectsTable.removeChild(objectsTable.lastChild);
@@ -127,35 +125,36 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
             for (let i = 0; i < objectsArray.length; i = i + 1) {
                 let row = document.createElement("tr");
                 let keyCell = document.createElement("td");
-                keyCell.innerHTML = objectsArray[i].key;
+                keyCell.innerHTML = objectsArray[i].S3Key;
                 /* */
                 let imageCell = document.createElement("td");
                 let img = document.createElement("img");
                 img.style.objectFit = "cover";
                 img.alt = "Loading...";
                 imageCell.appendChild(img);
-                fetchThumbnail(objectsArray[i].key, img);
+                fetchThumbnail(objectsArray[i].S3Key, img);
                 /* */
                 let descriptionCell = document.createElement("td");
-                let descriptionText = "No description";
-                if (descriptionList && descriptionList.has(objectsArray[i].key)) {
-                    descriptionText = descriptionList.get(objectsArray[i].key);
-                }
+                let descriptionText = objectsArray[i].Description || "No description";
                 descriptionCell.innerHTML = descriptionText;
                 /* */
                 let downloadCell = document.createElement("td");
                 let downloadButton = document.createElement("button");
                 downloadButton.addEventListener("click", function () {
-                    downloadObject(objectsArray[i].key);
-                    //fetchObject(objectsArray[i].key)
+                    //downloadObject(objectsArray[i].S3Key);
+                    fetchObject(objectsArray[i].S3Key)
                 });
+                /* */
+                let emailCell = document.createElement("td");
+                emailCell.innerHTML = objectsArray[i].Email || "No email";
+                /* */
                 downloadButton.innerHTML = "Download";
                 downloadCell.appendChild(downloadButton);
                 /* */
                 let deleteCell = document.createElement("td");
                 let deleteButton = document.createElement("button");
                 deleteButton.addEventListener("click", function () {
-                    deleteObject(objectsArray[i].key);
+                    deleteObject(objectsArray[i].S3Key);
                 });
                 deleteButton.innerHTML = "Delete";
                 deleteCell.appendChild(deleteButton);
@@ -163,6 +162,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 row.appendChild(imageCell);
                 row.appendChild(keyCell);
                 row.appendChild(descriptionCell);
+                row.appendChild(emailCell);
                 row.appendChild(downloadCell);
                 row.appendChild(deleteCell);
                 objectsTable.appendChild(row);
@@ -190,9 +190,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                     return response.text();
                 })
                 .then((text) => {
+                    // Decode base64 response
+                    const decodedText = atob(text);
                     // Show gallery sections
                     document.querySelectorAll('.gallery-section').forEach(el => el.classList.add('show'));
-                    renderListOfObjects(text);
+                    renderListOfObjects(decodedText);
                 })
                 .catch((error) => {
                     console.log(`Error: ${error.message}`);
@@ -388,6 +390,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                     "content": uint8Array.toBase64(),
                     "key": file.name,
                     "description": description,
+                    "email": document.getElementById('email').value,
+                    "token": document.getElementById('token').value
                 };
                 fetch(url, {
                     method: 'PUT',
@@ -438,9 +442,17 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 .then((resp) => resp.json())
                 .then(function (response) {
                     console.info('fetch()', response);
+                    if (response.success === false || response.error) {
+                        alert("Error: " + response.error);
+                        return;
+                    }
                     document.getElementById('token').value = response.token;
                     // Alert user about the token
                     alert("Here is your token. Please copy and save it securely.\n\n" + response.token);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert("Failed to get token: " + error.message);
                 });
         };
 

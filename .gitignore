@@ -1,0 +1,48 @@
+# Maven build artifacts
+**/target/
+**/dependency-reduced-pom.xml
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+Thumbs.db
+*~
+
+# AWS credentials (should use environment variables or GitHub secrets instead)
+*.pem
+*.key
+aws-credentials.json
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# Maven wrapper
+!.mvn/wrapper/maven-wrapper.jar
+
+# Test coverage
+*.exec
