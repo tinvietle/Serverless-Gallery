@@ -19,11 +19,6 @@
       "handler": "vgu.cloud26.LambdaDeleteOrchestrator::handleRequest",
       "description": "Orchestrate delete operations"
     },
-    "LambdaDeleteResized": {
-      "functionName": "LambdaDeleteResized",
-      "handler": "vgu.cloud26.LambdaDeleteResized::handleRequest",
-      "description": "Delete resized images"
-    },
     "LambdaDownloadObject": {
       "functionName": "LambdaDownloadObject",
       "handler": "vgu.cloud26.LambdaDownloadObject::handleRequest",
@@ -35,7 +30,7 @@
       "description": "Orchestrate download operations"
     },
     "LambdaEntryPoint": {
-      "functionName": "LambdaEntryPoint",
+      "functionName": "BlsLambdaEntryPoint",
       "handler": "vgu.cloud26.LambdaEntryPoint::handleRequest",
       "description": "Entry point Lambda"
     },
@@ -45,17 +40,12 @@
       "description": "Fetch thumbnails"
     },
     "LambdaGetListOfObjects": {
-      "functionName": "LambdaGetListOfObjects",
+      "functionName": "BlsLambdaGetListOfObjects",
       "handler": "vgu.cloud26.LambdaGetListOfObjects::handleRequest",
       "description": "Get list of objects from S3"
     },
-    "LambdaGetListsOfObjectDB": {
-      "functionName": "LambdaGetListsOfObjectDB",
-      "handler": "vgu.cloud26.LambdaGetListsOfObjectDB::handleRequest",
-      "description": "Get list of objects from database"
-    },
     "LambdaGetObjects": {
-      "functionName": "LambdaGetObjects",
+      "functionName": "BlsLambdaGetObjects",
       "handler": "vgu.cloud26.LambdaGetObjects::handleRequest",
       "description": "Get objects"
     },
@@ -64,11 +54,7 @@
       "handler": "vgu.cloud26.LambdaGetPhotosDB::handleRequest",
       "description": "Get photos from database"
     },
-    "LambdaImageResize": {
-      "functionName": "LambdaImageResize",
-      "handler": "vgu.cloud26.LambdaImageResize::handleRequest",
-      "description": "Resize images"
-    },
+
     "LambdaListObjectsOrchestrator": {
       "functionName": "LambdaListObjectsOrchestrator",
       "handler": "vgu.cloud26.LambdaListObjectsOrchestrator::handleRequest",
