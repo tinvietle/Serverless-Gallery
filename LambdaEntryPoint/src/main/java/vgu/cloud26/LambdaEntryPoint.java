@@ -1,3 +1,8 @@
+/*
+Function: LambdaEntryPoint
+Description: A trick to deploy the HTML frontend through invoke the GetObjects Lambda to retrieve the HTML file as base64 encoded string. (However, packed the HTML and use Amplify will be a better approach.)
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;

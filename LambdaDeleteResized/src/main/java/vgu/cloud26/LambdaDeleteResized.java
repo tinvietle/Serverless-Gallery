@@ -1,3 +1,7 @@
+/*
+Depricated function LambdaDeleteResized
+*/
+
 package vgu.cloud26;
 
 

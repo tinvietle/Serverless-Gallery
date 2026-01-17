@@ -1,3 +1,8 @@
+/*
+Function: LambdaFetchThumbnails
+Description: Retrieved the corresponding thumnail (resized image) from resized bucket and transfer through network as base64 encoded string.
+*/
+
 package vgu.cloud26;
 
 

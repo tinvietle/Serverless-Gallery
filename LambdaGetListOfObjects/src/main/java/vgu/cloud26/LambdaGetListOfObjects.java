@@ -1,3 +1,7 @@
+/*
+Function: LambdaGetListOfObjects
+Description: Deprecated function where list of objects is gathered from S3 bucket and returned as JSON array. (Newer version using RDS database instead.)
+*/
 package vgu.cloud26;
 
 

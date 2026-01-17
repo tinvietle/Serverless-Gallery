@@ -1,3 +1,8 @@
+/*
+Function LambdaDownloadObject
+Description: Download object as base64 given the key. Search for matched object in S3 bucket "cloud-public-mpg". Transfer image as buffer if size < 10MB.
+*/
+
 package vgu.cloud26;
 
 

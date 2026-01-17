@@ -1,6 +1,9 @@
+/*
+function LambdaDeleteObject
+Description: Delete object from given S3 bucket
+*/
+
 package vgu.cloud26;
-
-
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;

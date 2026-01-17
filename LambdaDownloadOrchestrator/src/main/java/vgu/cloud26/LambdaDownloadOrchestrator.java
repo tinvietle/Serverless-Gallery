@@ -1,3 +1,8 @@
+/*
+Function: LambdaDownloadOrchestrator
+Description: Invoke download of object from original S3 bucket if token validation is successful.
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;

@@ -1,3 +1,8 @@
+/*
+function LambdaDeleteOrchestrator
+Description: Invoke deleteion of object in S3, resized S3, and description in DB. Handle token validation beforehand.
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -109,19 +114,13 @@ public class LambdaDeleteOrchestrator implements
                                         .put("key", objName)
                                         .put("bucket", "cloud-public-mpg");
                         JSONObject deleteWrapper = new JSONObject()
-                                        .put("body", deletePayload.toString());
-
-                        CompletableFuture<String> deleteObjectFuture = callLambdaAsync("LambdaDeleteObject",
-                                        deleteWrapper.toString(), logger);
+                                        .put("body", deletePayload.toString());                      
 
                         // 2. Delete description from DB - can run in parallel
                         JSONObject deleteDescPayload = new JSONObject()
                                         .put("imageKey", objName);
                         JSONObject deleteDescWrapper = new JSONObject()
                                         .put("body", deleteDescPayload.toString());
-
-                        CompletableFuture<String> deleteDescFuture = callLambdaAsync("LambdaDeleteDescriptionDB",
-                                        deleteDescWrapper.toString(), logger);
 
                         // 3. Delete resized image from S3 - can run in parallel
                         String resizedKey = "resized-" + objName;
@@ -131,6 +130,11 @@ public class LambdaDeleteOrchestrator implements
                         JSONObject deleteResizedWrapper = new JSONObject()
                                         .put("body", deleteResizedPayload.toString());
 
+                        // Invoke Lambdas asynchronously
+                        CompletableFuture<String> deleteObjectFuture = callLambdaAsync("LambdaDeleteObject",
+                                        deleteWrapper.toString(), logger);
+                        CompletableFuture<String> deleteDescFuture = callLambdaAsync("LambdaDeleteDescriptionDB",
+                                        deleteDescWrapper.toString(), logger);
                         CompletableFuture<String> deleteResizedFuture = callLambdaAsync("LambdaDeleteObject",
                                         deleteResizedWrapper.toString(), logger);
 
