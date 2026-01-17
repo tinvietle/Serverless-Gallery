@@ -58,57 +58,32 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
         </table>
     </div>
     <div class="gallery-section">
-        <img src="" id="download_image" alt="Downloaded image">
+        <img src="" id="download_image" alt="Downloaded image will be here">
     </div>
     <script>
         //getObjectList();
         //fetchListOfObjects();
 
-        function putObject(json) {
-            let url = "https://lb5kjez2qhps5pvrcxqoawqvtu0pwczn.lambda-url.us-east-1.on.aws/";
-            fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(json)
-            })
-                .then((resp) => resp.text())
-                .then(function (response) {
-                    fetchListOfObjects();
-                    console.info('fetch()', response);
-                });
-        };
-        ;
-        function uploadObject() {
-            let file_input = document.getElementById("file_input");
-            let file = file_input.files[0];
-            let reader = new FileReader();
-            reader.onload = () => {
-                //The Uint8Array allows you to read and write individual 
-                //bytes within the ArrayBuffer using array-like indexing.
-                const uint8Array = new Uint8Array(reader.result);
-                //The toBase64() method of Uint8Array instances returns a base64-encoded string 
-                //based on the data in this Uint8Array object.
-                const body = {
-                    "content": uint8Array.toBase64(),
-                    "key": file.name
-                };
-                putObject(body);
-            };
-            reader.onerror = (e) => {
-                console.log('Error : ' + e.type);
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
         function deleteObject(filename) {
             let url = "https://amemfkr74omup6c6ycoxtf42ge0wyofo.lambda-url.us-east-1.on.aws/";
             const body = {
+                "email": document.getElementById('email').value,
+                "token": document.getElementById('token').value,
                 "key": filename
             };
             fetch(url, {
                 method: 'DELETE',
                 body: JSON.stringify(body)
             })
-                .then((resp) => resp.text())
+                .then((resp) => {
+                    if (!resp.ok) {
+                        alert("Error deleting file. Status: " + resp.status);
+                        // Hide gallery sections
+                        document.querySelectorAll('.gallery-section').forEach(el => el.classList.remove('show'));
+                        throw new Error(`HTTP error, status = ${resp.status}`);
+                    }
+                    return resp.text();
+                })
                 .then(function (response) {
                     fetchListOfObjects();
                     console.info('fetch()', response);
@@ -185,6 +160,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 .then((response) => {
                     if (!response.ok) {
                         alert("Error fetching object list. Status: " + response.status);
+                        // Hide gallery sections
+                        document.querySelectorAll('.gallery-section').forEach(el => el.classList.remove('show'));
                         throw new Error(`HTTP error, status = ${response.status}`);
                     }
                     return response.text();
@@ -205,24 +182,41 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
 
         function fetchObject(key) {
             const body = {
+                "email": document.getElementById('email').value,
+                "token": document.getElementById('token').value,
                 "key": key
             };
-            /*       
-             let url = "https://c2by4ajeblmkwtz364qoludmnu0bgoge.lambda-url.ap-southeast-1.on.aws/?key=" + key;
-             */
-            let url = "https://3xwqn4svszjd4kqhqk266hixaq0bzmrn.lambda-url.us-east-1.on.aws/";
+            let url = "https://hl4vd5fzqtxirbwgmqwunklijm0ksibx.lambda-url.us-east-1.on.aws/";
 
-            fetch(url,
-                {
-                    method: 'PUT',
-                    body: JSON.stringify(body)
-                }
-            )
-                .then(response => response.blob())
-                .then((myBlob) => {
+            fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(body)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        alert("Error fetching object. Status: " + response.status);
+                        // Hide gallery sections
+                        document.querySelectorAll('.gallery-section').forEach(el => el.classList.remove('show'));
+                        throw new Error(`HTTP error, status = ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then((base64Data) => {
+                    // Decode base64 to binary string
+                    const binaryString = atob(base64Data);
+                    // Convert binary string to byte array
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    // Create blob from byte array
+                    const myBlob = new Blob([bytes]);
                     const objectURL = URL.createObjectURL(myBlob);
                     const img_S3 = document.getElementById("download_image");
                     img_S3.src = objectURL;
+                })
+                .catch((error) => {
+                    console.error('Error fetching object:', error);
                 });
         }
 
@@ -262,57 +256,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 });
         }
 
-        /* GET BUCKET OBJECT LIST */
-        function getObjectList() {
-            let objectsTable = document.getElementById("objectsTable");
-            while (objectsTable.firstChild) {
-                objectsTable.removeChild(objectsTable.lastChild);
-            }
-            const xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        let objectsArray = JSON.parse(xhr.responseText);
-
-                        for (let i = 0; i < objectsArray.length; i = i + 1) {
-                            let row = document.createElement("tr");
-                            let keyCell = document.createElement("td");
-                            keyCell.innerHTML = objectsArray[i].key;
-
-                            let downloadCell = document.createElement("td");
-                            let downloadButton = document.createElement("button");
-                            downloadButton.addEventListener("click", function () {
-                                //downloadObject(objectsArray[i].key);
-                                fetchObject(objectsArray[i].key)
-                            });
-                            downloadButton.innerHTML = "Download";
-                            downloadCell.appendChild(downloadButton);
-                            /* */
-                            let deleteCell = document.createElement("td");
-                            let deleteButton = document.createElement("button");
-                            deleteButton.addEventListener("click", function () {
-                                deleteObject(objectsArray[i].key);
-                            });
-                            deleteButton.innerHTML = "Delete";
-                            deleteCell.appendChild(deleteButton);
-                            /* */
-                            row.appendChild(keyCell);
-                            row.appendChild(downloadCell);
-                            row.appendChild(deleteCell);
-                            objectsTable.appendChild(row);
-                        }
-
-                    } else {
-                        console.log(xhr.responseText);
-                    }
-                }
-            };
-            xhr.open("GET", "https://fxar4c32i7xttaaxzwlqkxujca0awmxy.lambda-url.ap-southeast-1.on.aws");
-            xhr.send(null);
-
-        }
-
-
         /* DOWNLOAD OBJECT */
         function downloadObject(key) {
             const xhr = new XMLHttpRequest();
@@ -350,30 +293,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
             xhr.send(body1);
         }
 
-        function fetchDescriptionList() {
-            const url = "https://kwncgnx3w2iaqjwhy5mqbqtsey0xtjdv.lambda-url.us-east-1.on.aws/";
-
-            return fetch(url)
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error, status = ${response.status}`);
-                    }
-                    return response.json(); // parse JSON directly
-                })
-                .then((data) => {
-                    // Convert array to map: ID -> {Description, S3Key}
-                    const map = new Map();
-                    data.forEach(item => {
-                        map.set(item.S3Key, item.Description);
-                    });
-                    return map;
-                })
-                .catch((error) => {
-                    console.log(`Error: ${error.message}`);
-                    return null;
-                });
-        }
-
         function triggerUploadFileAndDescription(){
             let file_input = document.getElementById("file_input");
             let file = file_input.files[0];
@@ -397,7 +316,15 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                     method: 'PUT',
                     body: JSON.stringify(body)
                 })
-                    .then((resp) => resp.text())
+                    .then((resp) => {
+                        if (!resp.ok) {
+                            alert("Error uploading file. Status: " + resp.status);
+                            // Hide gallery sections
+                            document.querySelectorAll('.gallery-section').forEach(el => el.classList.remove('show'));
+                            throw new Error(`HTTP error, status = ${resp.status}`);
+                        }
+                        return resp.text();
+                    })
                     .then(function (response) {
                         console.info('fetch()', response);
                     })
@@ -410,24 +337,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
             };
             reader.readAsArrayBuffer(file);
         }
-
-        function insertDescription() {
-            let url = "https://lsc44icvx5zobvwwbojhp5j2di0lzstc.lambda-url.us-east-1.on.aws/";
-            const description = document.getElementById('Description').value;
-            const s3key = document.getElementById('file_input').files[0].name;
-            const body = {
-                "description": description,
-                "imageKey": s3key
-            };
-            fetch(url, {
-                method: 'PUT',
-                body: JSON.stringify(body)
-            })
-                .then((resp) => resp.text())
-                .then(function (response) {
-                    console.info('fetch()', response);
-                });
-        };
 
         function getTokenForUser() {
             let url = "https://5qwvu7cezahvjskn6cxs3aziti0qyydg.lambda-url.us-east-1.on.aws/";

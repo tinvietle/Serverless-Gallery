@@ -77,6 +77,8 @@ public class LambdaDeleteOrchestrator implements
                 }
                 JSONObject bodyJSON = new JSONObject(requestBody);
 
+                String email = bodyJSON.getString("email");
+                String token = bodyJSON.getString("token");
                 String objName = bodyJSON.getString("key");
                 String responseString = "";
 
@@ -84,6 +86,24 @@ public class LambdaDeleteOrchestrator implements
                 // Note: The resized image will be deleted automatically by S3 event trigger to
                 // LambdaDeleteResized
                 try {
+                        // Step 0: Validate token first
+                        JSONObject tokenPayload = new JSONObject()
+                                        .put("email", email)
+                                        .put("token", token);
+                        JSONObject tokenWrapper = new JSONObject()
+                                        .put("body", tokenPayload.toString());
+                        String tokenResponse = callLambda("LambdaTokenChecker", tokenWrapper.toString(), logger);
+                        JSONObject tokenResponseJSON = new JSONObject(tokenResponse);
+                        boolean success = tokenResponseJSON.optBoolean("success", false);
+                        if (!success) {
+                                logger.log("Token validation failed. Aborting upload.");
+                                return new APIGatewayProxyResponseEvent()
+                                                .withStatusCode(403)
+                                                .withBody("Invalid token. Access denied.")
+                                                .withIsBase64Encoded(false)
+                                                .withHeaders(Map.of("Content-Type", "text/plain"));
+                        }
+
                         // 1. Delete original object from S3
                         JSONObject deletePayload = new JSONObject()
                                         .put("key", objName)
