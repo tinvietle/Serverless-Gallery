@@ -73,8 +73,8 @@ jobs:
             echo "lambdas=[]" >> $GITHUB_OUTPUT
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
-            # Convert to JSON array
-            LAMBDAS_JSON=$(printf '%s\n' "${VALID_LAMBDAS[@]}" | jq -R . | jq -s .)
+            # Convert to JSON array (compact format for GITHUB_OUTPUT)
+            LAMBDAS_JSON=$(printf '%s\n' "${VALID_LAMBDAS[@]}" | jq -R . | jq -sc .)
             echo "Changed lambdas: $LAMBDAS_JSON"
             echo "lambdas=$LAMBDAS_JSON" >> $GITHUB_OUTPUT
             echo "has_changes=true" >> $GITHUB_OUTPUT
