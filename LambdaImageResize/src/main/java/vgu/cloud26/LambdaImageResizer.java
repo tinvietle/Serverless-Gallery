@@ -1,3 +1,8 @@
+/*
+Function: LambdaImageResizer
+Description: Take input image as base64 string, resize it to thumbnail size, and return reiszed image as base64 string.
+*/
+
 package vgu.cloud26;
 
 
@@ -37,7 +42,7 @@ public class LambdaImageResizer implements
         LambdaLogger logger = context.getLogger();
 
         String content = event.getBody();
-        if (content == "EventBridgeInvoke") {
+        if (content != null && content.equals("EventBridgeInvoke")) {
             logger.log("Invoked by EventBridge, no action taken.");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)

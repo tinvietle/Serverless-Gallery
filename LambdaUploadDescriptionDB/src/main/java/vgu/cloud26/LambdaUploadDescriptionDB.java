@@ -1,3 +1,8 @@
+/*
+Function: LambdaUploadDescriptionDB
+Description: Upload photo description along with S3 key and email to RDS database.
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -65,6 +70,7 @@ public class LambdaUploadDescriptionDB
                                                 .withBody("No action taken for EventBridge invocation.");
                         }
                         
+                        // Parse JSON body
                         JSONObject json = new JSONObject(requestBody);
                         String description = json.getString("description");
                         String imageKey = json.getString("imageKey");
@@ -72,6 +78,7 @@ public class LambdaUploadDescriptionDB
 
                         Class.forName("com.mysql.cj.jdbc.Driver");
 
+                        // Insert description into RDS
                         try (Connection conn = DriverManager.getConnection(JDBC_URL, setMySqlConnectionProperties());
                                         PreparedStatement stmt = conn.prepareStatement(
                                                         "INSERT INTO Photos (Description, S3Key, Email) VALUES (?, ?, ?)")) {

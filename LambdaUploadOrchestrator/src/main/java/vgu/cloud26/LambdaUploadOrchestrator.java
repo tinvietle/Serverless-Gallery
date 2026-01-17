@@ -1,3 +1,8 @@
+/*
+Function: LambdaUploadOrchestrator
+Description: Orchestrator function to invoke lambda to upload image to S3, resize it, and store description
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -108,8 +113,7 @@ public class LambdaUploadOrchestrator implements
                                                 .withIsBase64Encoded(false)
                                                 .withHeaders(Map.of("Content-Type", "text/plain"));
                         }
-                        // Step 1 & 2: Upload original and resize image can run in parallel (independent
-                        // operations)
+                        // Step 1 & 2: Upload original and resize image can run in parallel
                         JSONObject filePayload = new JSONObject()
                                         .put("content", content)
                                         .put("key", uniqueFilename)
@@ -134,9 +138,7 @@ public class LambdaUploadOrchestrator implements
 
                         responseString += uploadOriginalResponse;
 
-                        // Step 3 & 4: Upload resized image and upload description DB can run in
-                        // parallel
-                        // (both depend on steps 1 & 2 completing, but are independent of each other)
+                        // Step 3 & 4: Upload resized image and upload description DB can run in parallel
                         String resizedKey = "resized-" + uniqueFilename;
                         JSONObject resizeImagePayload = new JSONObject()
                                         .put("content", resizeResponse)

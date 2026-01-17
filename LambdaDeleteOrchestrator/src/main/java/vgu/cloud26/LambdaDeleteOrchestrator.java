@@ -88,8 +88,6 @@ public class LambdaDeleteOrchestrator implements
                 String responseString = "";
 
                 // PARALLEL PROCESSING: Delete original image and description DB concurrently
-                // Note: The resized image will be deleted automatically by S3 event trigger to
-                // LambdaDeleteResized
                 try {
                         // Step 0: Validate token first
                         JSONObject tokenPayload = new JSONObject()
@@ -138,7 +136,7 @@ public class LambdaDeleteOrchestrator implements
                         CompletableFuture<String> deleteResizedFuture = callLambdaAsync("LambdaDeleteObject",
                                         deleteResizedWrapper.toString(), logger);
 
-                        // Wait for both to complete
+                        // Wait for those to complete
                         String deleteObjectResponse = deleteObjectFuture.get();
                         String deleteDescResponse = deleteDescFuture.get();
                         String deleteResizedResponse = deleteResizedFuture.get();

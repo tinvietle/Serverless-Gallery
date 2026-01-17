@@ -1,3 +1,8 @@
+/*
+Function: LambdaTokenGenerator
+Description: Generate secure token using HMAC-SHA256 based on email and secret key from Parameter Store.
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -110,7 +115,6 @@ public class LambdaTokenGenerator implements RequestHandler<APIGatewayProxyReque
             
             JSONObject responseBody = new JSONObject();
             responseBody.put("token", token);   
-            responseBody.put("key", key);         
             
             Map<String, String> headers = Map.of(
                 "Content-Type", "application/json"

@@ -1,7 +1,9 @@
+/*
+Function: LambdaUploadObject
+Description: Upload object to specified S3 bucket given base64 content and key.
+*/
+
 package vgu.cloud26;
-
-
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -24,13 +26,14 @@ public class LambdaUploadObject implements
         // String bucketName = "cloud-public-mpg";
         String requestBody = event.getBody();
 
-        if (requestBody == "EventBridgeInvoke") {
+        if (requestBody != null && requestBody.equals("EventBridgeInvoke")) {
             context.getLogger().log("Invoked by EventBridge, no action taken.");
             return new APIGatewayProxyResponseEvent()
                             .withStatusCode(200)
                             .withBody("No action taken for EventBridge invocation.");
         }
         
+        // Parse request body to get the object content, key, and bucket name
         JSONObject bodyJSON = new JSONObject(requestBody);
         String content = bodyJSON.getString("content");
         String objName = bodyJSON.getString("key");
@@ -39,11 +42,13 @@ public class LambdaUploadObject implements
         
         byte[] objBytes = Base64.getDecoder().decode(content.getBytes());
         
+        // Create PutObjectRequest
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objName)
                 .build();
 
+        // Upload object to S3
         S3Client s3Client = S3Client.builder()
                 .region(Region.US_EAST_1)
                 .build();

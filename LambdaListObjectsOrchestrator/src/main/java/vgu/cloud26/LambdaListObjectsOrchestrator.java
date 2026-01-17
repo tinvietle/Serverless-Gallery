@@ -1,3 +1,8 @@
+/*
+Function: LambdaListObjectsOrchestrator
+Description: Orchestrator function to validate token and get list of objects from RDS database.
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -59,6 +64,7 @@ public class LambdaListObjectsOrchestrator implements
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
         LambdaLogger logger = context.getLogger();
 
+        // Parse request
         String requestBody = event.getBody();
         if (requestBody != null && requestBody.equals("EventBridgeInvoke")) {
             logger.log("Invoked by EventBridge, no action taken.");

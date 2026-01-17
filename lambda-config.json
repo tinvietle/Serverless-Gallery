@@ -44,11 +44,6 @@
       "handler": "vgu.cloud26.LambdaGetListOfObjects::handleRequest",
       "description": "Get list of objects from S3"
     },
-    "LambdaGetObjects": {
-      "functionName": "BlsLambdaGetObjects",
-      "handler": "vgu.cloud26.LambdaGetObjects::handleRequest",
-      "description": "Get objects"
-    },
     "LambdaGetPhotoDB": {
       "functionName": "LambdaGetPhotosDB",
       "handler": "vgu.cloud26.LambdaGetPhotosDB::handleRequest",
@@ -59,11 +54,6 @@
       "functionName": "LambdaListObjectsOrchestrator",
       "handler": "vgu.cloud26.LambdaListObjectsOrchestrator::handleRequest",
       "description": "Orchestrate list objects operations"
-    },
-    "LambdaResize": {
-      "functionName": "LambdaResize",
-      "handler": "vgu.cloud26.LambdaResize::handleRequest",
-      "description": "Resize Lambda"
     },
     "LambdaTokenChecker": {
       "functionName": "LambdaTokenChecker",

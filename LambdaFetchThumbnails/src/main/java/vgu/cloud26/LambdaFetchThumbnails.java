@@ -62,6 +62,8 @@ public class LambdaFetchThumbnails implements RequestHandler<APIGatewayProxyRequ
         Boolean found = false;
         Boolean validSize = false;
         String mimeType = "application/octet-stream";
+
+        // Check if the object exists and its size
         for (S3Object object : objects) {
             if (object.key().equals(key)) {
                 found = true;

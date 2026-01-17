@@ -1,3 +1,8 @@
+/*
+Function: LambdaGetPhotosDB
+Description: Get all rows of Photos from table in RDS database and return as JSON array (base64 encoded).
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -83,6 +88,8 @@ public class LambdaGetPhotosDB implements RequestHandler<APIGatewayProxyRequestE
 
                         // result = "Success!";
 
+
+                        // SQL query to get all photos
                         PreparedStatement st = mySQLClient.prepareStatement(
 
                                         "SELECT * FROM Photos"
@@ -91,6 +98,7 @@ public class LambdaGetPhotosDB implements RequestHandler<APIGatewayProxyRequestE
 
                         ResultSet rs = st.executeQuery();
 
+                        // Iterate through the result set and build JSON array
                         while (rs.next()) {
 
                                 JSONObject item = new JSONObject();

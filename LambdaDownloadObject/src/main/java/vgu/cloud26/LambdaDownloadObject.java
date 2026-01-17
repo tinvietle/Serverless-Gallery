@@ -62,6 +62,8 @@ public class LambdaDownloadObject implements RequestHandler<APIGatewayProxyReque
         Boolean found = false;
         Boolean validSize = false;
         String mimeType = "application/octet-stream";
+
+        // Check if the object exists and its size
         for (S3Object object : objects) {
             if (object.key().equals(key)) {
                 found = true;
@@ -78,6 +80,8 @@ public class LambdaDownloadObject implements RequestHandler<APIGatewayProxyReque
                 break;
             }
         }
+
+        // Download object if found and valid size
         String encodedString = "";
         if (found && validSize) {
             GetObjectRequest s3Request

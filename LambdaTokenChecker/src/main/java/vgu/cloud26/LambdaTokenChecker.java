@@ -1,3 +1,7 @@
+/*
+
+*/
+
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -73,6 +77,7 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
             // Generate the token
             String generatedToken = generateSecureToken(email, key, logger);
 
+            // Check if the generated token matches the provided token
             JSONObject responseBody = new JSONObject();
             if (generatedToken != null && generatedToken.equals(token)){
                 responseBody.put("success", true);
