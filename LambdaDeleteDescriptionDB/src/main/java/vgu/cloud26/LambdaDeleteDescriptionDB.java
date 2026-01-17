@@ -1,3 +1,7 @@
+/*
+ function: LambdaDeleteDescriptionDB
+ description: This lambda delete description from the RDS database given the image key
+*/
 package vgu.cloud26;
 
 import com.amazonaws.services.lambda.runtime.Context;
