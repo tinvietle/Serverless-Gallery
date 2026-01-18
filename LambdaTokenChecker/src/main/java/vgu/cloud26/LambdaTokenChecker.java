@@ -64,7 +64,7 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
         LambdaLogger logger = context.getLogger();
-        logger.log("Processing token checking request");
+        logger.log("Processing token checker request");
 
         try {
             // Parse the request body
@@ -72,15 +72,22 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
             if (requestBody != null && requestBody.equals("EventBridgeInvoke")) {
                 logger.log("Invoked by EventBridge, no action taken.");
                 return new APIGatewayProxyResponseEvent()
-                                .withStatusCode(200)
-                                .withBody("No action taken for EventBridge invocation.");
+                        .withStatusCode(200)
+                        .withBody("");
             }
             JSONObject json = new JSONObject(requestBody);
             
             String email = json.getString("email");
             String token = json.getString("token");
 
-            logger.log("Email: " + email);
+            // Check if email is provided
+            if (email == null || email.isEmpty()) {
+                logger.log("Email is missing in the request");
+                return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400)
+                    .withBody("{\"success\": false, \"error\": \"Email is required\"}");
+            }
+            
             // Get the session token from environment variable
             String sessionToken = System.getenv("AWS_SESSION_TOKEN");
             
@@ -102,14 +109,12 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
                 JSONObject paramResponse = new JSONObject(responseParameter.body());
                 JSONObject parameter = paramResponse.getJSONObject("Parameter");
                 String key = parameter.getString("Value");
-
-                logger.log("Retrieved parameter response: " + responseParameter.body());
             
             logger.log("Using key from parameter store: " + key);
             
             // Generate the token
             String generatedToken = generateSecureToken(email, key, logger);
-
+            
             // Check if the generated token matches the provided token
             JSONObject responseBody = new JSONObject();
             if (generatedToken != null && generatedToken.equals(token)){
