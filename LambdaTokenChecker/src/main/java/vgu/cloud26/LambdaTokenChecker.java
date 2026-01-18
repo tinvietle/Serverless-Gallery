@@ -1,5 +1,6 @@
 /*
-
+Function: LambdaTokenChecker
+Description: Validate secure token using HMAC-SHA256 based on email and secret key from Parameter Store.
 */
 
 package vgu.cloud26;
@@ -79,6 +80,7 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
             String email = json.getString("email");
             String token = json.getString("token");
 
+            logger.log("Email: " + email);
             // Get the session token from environment variable
             String sessionToken = System.getenv("AWS_SESSION_TOKEN");
             
