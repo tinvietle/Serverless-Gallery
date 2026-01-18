@@ -46,3 +46,6 @@ aws-credentials.json
 
 # Test coverage
 *.exec
+
+# Cheatsheet ignore
+cheatsheet/*

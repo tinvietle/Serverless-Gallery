@@ -9,9 +9,15 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import javax.crypto.Mac;
@@ -72,7 +78,30 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
             
             String email = json.getString("email");
             String token = json.getString("token");
-            String key = "cloud26";
+            
+           // Get the session token from environment variable
+            String sessionToken = System.getenv("AWS_SESSION_TOKEN");
+            
+            HttpClient client = HttpClient.newBuilder()
+                        .version(HttpClient.Version.HTTP_1_1)
+                        .followRedirects(HttpClient.Redirect.NORMAL)
+                        .connectTimeout(Duration.ofSeconds(10))
+                        .build();
+                
+                HttpRequest requestParameter = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:2773/systemsmanager/parameters/get/?name=S3DownloadKey&withDecryption=true"))
+                        .header("X-Aws-Parameters-Secrets-Token", sessionToken)
+                        .GET()
+                        .build();
+
+                HttpResponse<String> responseParameter = client.send(requestParameter, HttpResponse.BodyHandlers.ofString());
+
+                // Parse the JSON response to extract the Parameter value
+                JSONObject paramResponse = new JSONObject(responseParameter.body());
+                JSONObject parameter = paramResponse.getJSONObject("Parameter");
+                String key = parameter.getString("Value");
+            
+            logger.log("Using key from parameter store: " + key);
             
             // Generate the token
             String generatedToken = generateSecureToken(email, key, logger);
