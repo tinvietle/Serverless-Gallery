@@ -78,8 +78,8 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
             
             String email = json.getString("email");
             String token = json.getString("token");
-            
-           // Get the session token from environment variable
+
+            // Get the session token from environment variable
             String sessionToken = System.getenv("AWS_SESSION_TOKEN");
             
             HttpClient client = HttpClient.newBuilder()
@@ -100,6 +100,8 @@ public class LambdaTokenChecker implements RequestHandler<APIGatewayProxyRequest
                 JSONObject paramResponse = new JSONObject(responseParameter.body());
                 JSONObject parameter = paramResponse.getJSONObject("Parameter");
                 String key = parameter.getString("Value");
+
+                logger.log("Retrieved parameter response: " + responseParameter.body());
             
             logger.log("Using key from parameter store: " + key);
             
