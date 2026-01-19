@@ -88,3 +88,8 @@ A serverless image gallery using **AWS Lambda (Java)**, **S3**, **RDS MySQL**, a
 2. **Deploy**: Upload JAR to AWS Lambda
 3. **Configure**: Set Lambda Function URLs
 4. **Update**: Replace URLs in `index.html`
+
+## Acknowledgements
+
+The project is done by myself with great support from my professor Prof. Dr. Manuel Garcia Clavel.
+Contact for any questions or suggestions: tinvietle@gmail.com
