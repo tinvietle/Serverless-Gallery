@@ -89,8 +89,8 @@ public class LambdaUploadOrchestrator implements
                 String email = bodyJSON.getString("email");
                 String token = bodyJSON.getString("token");
 
-                String ext = objName.substring(objName.lastIndexOf('.'));
-                String uniqueFilename = System.currentTimeMillis() + "_" + UUID.randomUUID().toString() + ext;
+                // String ext = objName.substring(objName.lastIndexOf('.'));
+                String uniqueFilename = System.currentTimeMillis() + "_" + UUID.randomUUID().toString() + ".jpeg";
 
                 String responseString = "";
 
